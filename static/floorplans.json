@@ -4,6 +4,7 @@
       "id": "hensill-hall",
       "name": "Hensill Hall",
       "alias": [ "HH", "Science Building" ],
+      "keywords": ["biology", "labs", "classrooms", "chemistry", "research facilities"],
       "floorcount": 7;
       "floors": [
         {
