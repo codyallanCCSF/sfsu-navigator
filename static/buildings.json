@@ -1,0 +1,54 @@
+{
+  "campus": "San Francisco State University",
+  "buildings": [
+    {
+      "id": "j-paul-leonard-library",
+      "name": "J. Paul Leonard Library",
+      "aliases": ["Library", "JPL Library", "LIB"],
+      "floors": 5,
+      "keywords": ["books", "study rooms", "computers", "research", "quiet space", "printing"],
+      "floor_plans": [
+        {"floor": 1, "link": "https://sfsu.edu"},
+        {"floor": 2, "link": "https://sfsu.edu"},
+        {"floor": 3, "link": "https://sfsu.edu"},
+        {"floor": 4, "link": "https://sfsu.edu"},
+        {"floor": 5, "link": "https://sfsu.edu"}
+      ]
+    },
+    {
+      "id": "cesar-chavez-student-center",
+      "name": "Cesar Chavez Student Center",
+      "aliases": ["Student Center", "Chavez Center", "CCSC"],
+      "floors": 4,
+      "keywords": ["food", "dining", "bookstore", "student life", "lounge", "arcade", "subway"],
+      "floor_plans": [
+        {"floor": 1, "link": "https://sfsu.edu"},
+        {"floor": 2, "link": "https://sfsu.edu"},
+        {"floor": 3, "link": "https://sfsu.edu"},
+        {"floor": 4, "link": "https://sfsu.edu"}
+      ]
+    },
+    {
+      "id": "hensill-hall",
+      "name": "Hensill Hall",
+      "aliases": ["HH", "Science Building"],
+      "floors": 8,
+      "keywords": ["biology", "labs", "classrooms", "chemistry", "research facilities"],
+      "floor_plans": [
+        {"floor": 1, "link": "https://sfsu.edu"},
+        {"floor": 4, "link": "https://sfsu.edu"}
+      ]
+    },
+    {
+      "id": "mashouf-wellness-center",
+      "name": "Mashouf Wellness Center",
+      "aliases": ["MWC", "The Gym", "Wellness Center"],
+      "floors": 2,
+      "keywords": ["gym", "pool", "basketball", "fitness", "climbing wall", "workout", "cardio"],
+      "floor_plans": [
+        {"floor": 1, "link": "https://sfsu.edu"},
+        {"floor": 2, "link": "https://sfsu.edu"}
+      ]
+    }
+  ]
+}
