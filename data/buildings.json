@@ -3,39 +3,68 @@
     {
       "id": "hensill-hall",
       "name": "Hensill Hall",
-      "alias": [ "HH", "Science Building" ],
+      "alias": ["HH", "Science Building"],
       "keywords": ["biology", "labs", "classrooms", "chemistry", "research facilities"],
+      "notes": "Seven floors. Floor plans available in this app.",
       "floorcount": 7,
       "floors": [
-        {
-          "floor": 1,
-          "floorplan": "/static/floorplans/hensill-hall/1.png"
-        },
-        {
-          "floor": 2,
-          "floorplan": "/static/floorplans/hensill-hall/2.png"
-        },
-        {
-          "floor": 3,
-          "floorplan": "/static/floorplans/hensill-hall/3.png"
-        },
-        {
-          "floor": 4,
-          "floorplan": "/static/floorplans/hensill-hall/4.png"
-        },
-        {
-          "floor": 5,
-          "floorplan": "/static/floorplans/hensill-hall/5.png"
-        },
-        {
-          "floor": 6,
-          "floorplan": "/static/floorplans/hensill-hall/6.png"
-        },
-        {
-          "floor": 7,
-          "floorplan": "/static/floorplans/hensill-hall/7.png"
-        }
+        {"floor": 1, "floorplan": "/static/floorplans/hensill-hall/1.png"},
+        {"floor": 2, "floorplan": "/static/floorplans/hensill-hall/2.png"},
+        {"floor": 3, "floorplan": "/static/floorplans/hensill-hall/3.png"},
+        {"floor": 4, "floorplan": "/static/floorplans/hensill-hall/4.png"},
+        {"floor": 5, "floorplan": "/static/floorplans/hensill-hall/5.png"},
+        {"floor": 6, "floorplan": "/static/floorplans/hensill-hall/6.png"},
+        {"floor": 7, "floorplan": "/static/floorplans/hensill-hall/7.png"}
       ]
+    },
+    {
+      "id": "j-paul-leonard-library",
+      "name": "J. Paul Leonard Library",
+      "alias": [],
+      "keywords": ["library", "study space", "books", "quiet study"],
+      "notes": "VERIFY: add printing, group study rooms, hours."
+    },
+    {
+      "id": "thornton-hall",
+      "name": "Thornton Hall",
+      "alias": [],
+      "keywords": [],
+      "notes": "VERIFY: what is here?"
+    },
+    {
+      "id": "mashouf-wellness-center",
+      "name": "Mashouf Wellness Center",
+      "alias": [],
+      "keywords": ["gym", "fitness", "recreation", "wellness"],
+      "notes": "VERIFY: hours and student access."
+    },
+    {
+      "id": "gator-health-center",
+      "name": "Gator Health Center",
+      "alias": [],
+      "keywords": ["health", "clinic", "student health"],
+      "notes": "VERIFY: services and hours."
+    },
+    {
+      "id": "student-services",
+      "name": "Student Services",
+      "alias": [],
+      "keywords": ["student services"],
+      "notes": "VERIFY: which offices (ID card, advising, financial aid)."
+    },
+    {
+      "id": "administration",
+      "name": "Administration",
+      "alias": [],
+      "keywords": ["administration", "offices"],
+      "notes": "VERIFY: which offices."
+    },
+    {
+      "id": "creative-arts",
+      "name": "Creative Arts",
+      "alias": [],
+      "keywords": ["arts", "classrooms"],
+      "notes": "VERIFY."
     }
   ]
 }

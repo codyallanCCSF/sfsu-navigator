@@ -55,6 +55,11 @@ input{border:1px solid #d4dbe2;border-radius:8px;padding:7px 9px;width:130px;out
     </div>
   </div>
 
+  <form id="askForm" class="header" style="gap:8px">
+    <input id="askInput" placeholder="Ask about campus, e.g. where can I study quietly?" aria-label="Ask a question about campus" maxlength="300" style="flex:1;width:auto;font-size:14px;padding:10px">
+    <button id="askBtn" type="submit">Ask</button>
+  </form>
+
   <div class="layout">
     <div class="directory">
       <div class="directory-head">
@@ -72,6 +77,7 @@ input{border:1px solid #d4dbe2;border-radius:8px;padding:7px 9px;width:130px;out
       <span class="badge">SELECTED BUILDING</span>
       <h2 id="selectedName">None selected</h2>
       <p id="selectedInfo">Turn on building selection, then click any highlighted footprint on the map.</p>
+      <div id="askAnswer" class="stat" aria-live="polite" hidden></div>
       <div id="buildingDetails" class="building-details" hidden></div>
       <div class="stat">
         <strong id="count"></strong>
@@ -123,17 +129,24 @@ function renderBuildingDetails(name){
     return;
   }
 
+  const floors = data.floors || [];
   buildingDetails.innerHTML = `
     <div class="detail-row"><span class="detail-label">Name</span><div class="detail-value">${escapeHtml(data.name)}</div></div>
-    <div class="detail-row"><span class="detail-label">Aliases</span><div class="tag-list">${data.alias.map(a => `<span class="tag">${escapeHtml(a)}</span>`).join('')}</div></div>
-    <div class="detail-row"><span class="detail-label">Keywords</span><div class="tag-list">${data.keywords.map(k => `<span class="tag">${escapeHtml(k)}</span>`).join('')}</div></div>
-    <div class="detail-row"><label class="detail-label" for="floorSelect">Floor</label><select id="floorSelect" class="floor-select" aria-label="Select floor">${data.floors.map(f => `<option value="${f.floor}">Floor ${f.floor}</option>`).join('')}</select></div>
-    <div id="floorplanWrap" class="floorplan-wrap"><div class="floorplan-placeholder">Loading floor plan…</div></div>
+    ${tagRow('Aliases', data.alias)}
+    ${tagRow('Keywords', data.keywords)}
+    ${floors.length ? `<div class="detail-row"><label class="detail-label" for="floorSelect">Floor</label><select id="floorSelect" class="floor-select" aria-label="Select floor">${floors.map(f => `<option value="${f.floor}">Floor ${f.floor}</option>`).join('')}</select></div>
+    <div id="floorplanWrap" class="floorplan-wrap"><div class="floorplan-placeholder">Loading floor plan…</div></div>` : ''}
   `;
+  if (!floors.length) return;
 
   const floorSelect = document.getElementById('floorSelect');
   floorSelect.addEventListener('change', () => renderFloorplan(data, Number(floorSelect.value)));
   renderFloorplan(data, data.floors[0]?.floor);
+}
+
+function tagRow(label, values){
+  if (!values || !values.length) return '';
+  return `<div class="detail-row"><span class="detail-label">${label}</span><div class="tag-list">${values.map(v => `<span class="tag">${escapeHtml(v)}</span>`).join('')}</div></div>`;
 }
 
 function renderFloorplan(data, floorNumber){
@@ -268,6 +281,8 @@ clearBtn.addEventListener('click', () => {
   selectedName.textContent = 'None selected';
   selectedInfo.textContent = 'Click any building footprint or choose one from the Building Directory.';
   selectedBuilding = null;
+  askAnswer.hidden = true;
+  askAnswer.textContent = '';
   buildingDetails.hidden = true;
   buildingDetails.innerHTML = '';
   renderDirectory();
@@ -277,6 +292,39 @@ search.addEventListener('input', () => {
   const q = search.value.trim().toLowerCase();
   document.querySelectorAll('.hotspot').forEach(el => el.classList.toggle('dim', q && !el.dataset.name.includes(q)));
   renderDirectory(q);
+});
+
+// ---- Ask Gemini: question in, highlighted building out ----
+const askForm = document.getElementById('askForm');
+const askInput = document.getElementById('askInput');
+const askBtn = document.getElementById('askBtn');
+const askAnswer = document.getElementById('askAnswer');
+askForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const q = askInput.value.trim();
+  if (!q) return;
+  askBtn.disabled = true; askBtn.textContent = 'Asking...';
+  askAnswer.hidden = false; askAnswer.textContent = 'Thinking...';
+  try {
+    const res = await fetch('/api/ask', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({question: q})});
+    const data = await res.json();
+    if (!res.ok) { askAnswer.textContent = data.error || 'Something went wrong.'; return; }
+    askAnswer.textContent = data.answer;
+    const names = data.buildings.map(normalizeBuildingName);
+    document.querySelectorAll('.hotspot').forEach(el =>
+      el.classList.toggle('dim', names.length > 0 && !names.includes(el.dataset.name)));
+    if (data.buildings.length) {
+      selectBuilding(data.buildings[0], false);
+      const fs = document.getElementById('floorSelect');
+      if (data.floor && fs && [...fs.options].some(o => o.value == data.floor)) {
+        fs.value = data.floor; fs.dispatchEvent(new Event('change'));
+      }
+    }
+  } catch (err) {
+    askAnswer.textContent = 'Could not reach the server.';
+  } finally {
+    askBtn.disabled = false; askBtn.textContent = 'Ask';
+  }
 });
 </script>
 <div id="map"></div>

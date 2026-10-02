@@ -19,7 +19,7 @@ clickable campus map, but data, routing, floor plans, and the AI assistant are s
 | Places data (`data/places.json`) | One placeholder entry |
 | Events data (`data/events.json`) | Empty |
 | Routing graph (`data/building_graph.json`) | Empty (`nodes`/`edges`) |
-| AI assistant (`POST /api/ask`) | Stub: echoes the question; Gemini not called yet |
+| AI assistant (`POST /api/ask`) | Working: ask box above the map; Gemini picks up to 3 buildings from `data/buildings.json` and the map highlights them |
 | Tests / CI | None |
 
 ## Project Structure
@@ -34,7 +34,8 @@ data/
   places.json           Buildings / points of interest
   events.json           Campus events
   building_graph.json   Walkway graph for routing
-  buildings.json        Building details: aliases, keywords, floor plan image paths
+  buildings.json        Building details: aliases, keywords, notes, floor plan image paths.
+                        Also the only catalog Gemini may recommend from
 static/
   index.html            Main page (image-based interactive map)
   map.js                Leaflet map that loads markers from /api/places
@@ -54,7 +55,7 @@ docs/
 | GET | `/api/events` | Contents of `data/events.json` |
 | GET | `/api/buildings` | Contents of `data/buildings.json` |
 | GET | `/api/graph` | Contents of `data/building_graph.json` |
-| POST | `/api/ask` | Body `{"question": "..."}` (max 500 chars) → `{"answer", "place_ids", "event_ids", "route"}` (currently a stub) |
+| POST | `/api/ask` | Body `{"question": "..."}` (max 300 chars) → `{"answer", "buildings", "floor"}`; `400`/`503` → `{"error"}` |
 
 A place entry looks like:
 
@@ -74,6 +75,15 @@ pip install -r requirements.txt
 cp .env.example .env        # then paste your Gemini API key
 python app.py               # http://localhost:8080 (FLASK_DEBUG=1 for debug mode)
 ```
+
+### Gemini assistant
+
+`/api/ask` sends the question plus a catalog built from `data/buildings.json` (name,
+aliases, keywords, notes, floor numbers) to `GEMINI_MODEL` and asks for structured JSON.
+Guardrails: returned buildings not in the catalog are dropped, a floor is only kept if
+the top building has it, and notes starting with `VERIFY` are withheld from the model
+(they are unconfirmed TODOs). To make the assistant smarter, fill in `keywords` and
+replace `VERIFY` notes with confirmed facts.
 
 JSON data files are cached in memory, so restart the server after editing `data/`.
 
@@ -101,7 +111,7 @@ Because the app has a Python backend, it can no longer be hosted on GitHub Pages
   hard-coded inline with only a name; buildings with several footprints are grouped by name
   in the directory. They are not linked to `places.json` / `buildings.json` IDs.
 - **Placeholder data.** Leaflet bounds, the single place's coordinates, and the Gemini
-  model name in `.env.example` should all be verified.
+  model name (`GEMINI_MODEL`, default `gemini-3.8-flash`) should all be verified.
 
 ## Next Steps
 
