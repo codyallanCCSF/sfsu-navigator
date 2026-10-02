@@ -13,9 +13,9 @@ clickable campus map, but data, routing, floor plans, and the AI assistant are s
 | Area | State |
 | --- | --- |
 | Flask backend (`app.py`) | Done: serves the frontend and JSON data endpoints |
-| Interactive image map (`static/index.html`) | Working: 98 clickable building hotspots over an embedded campus map image, searchable building directory, search-to-highlight, selection panel, hotspots stay aligned on resize |
+| Interactive image map (`static/index.html`) | Working: 96 clickable building hotspots (59 buildings) over an embedded campus map image, searchable building directory, search-to-highlight, selection panel, hotspots stay aligned on resize |
 | Leaflet / OpenStreetMap map (`static/map.js`) | Skeleton: placeholder bounds; currently conflicts with the image map (see Known Issues) |
-| Floor plans (`static/floorplan.js`) | Stub: `openFloorplan(id)` only shows placeholder text |
+| Floor plans | Working for Hensill Hall: selecting it shows a floor selector and plan image (`data/buildings.json`, images in `static/floorplans/`). `static/floorplan.js` is an unused stub |
 | Places data (`data/places.json`) | One placeholder entry |
 | Events data (`data/events.json`) | Empty |
 | Routing graph (`data/building_graph.json`) | Empty (`nodes`/`edges`) |
@@ -34,11 +34,13 @@ data/
   places.json           Buildings / points of interest
   events.json           Campus events
   building_graph.json   Walkway graph for routing
+  buildings.json        Building details: aliases, keywords, floor plan image paths
 static/
   index.html            Main page (image-based interactive map)
   map.js                Leaflet map that loads markers from /api/places
   floorplan.js          Floor plan overlay hooks
   style.css             Base styles
+  floorplans/<id>/N.png Floor plan images, one per floor
 docs/
   reference/            Reference material (not deployed)
 ```
@@ -50,8 +52,9 @@ docs/
 | GET | `/` | `static/index.html` |
 | GET | `/api/places` | Contents of `data/places.json` |
 | GET | `/api/events` | Contents of `data/events.json` |
+| GET | `/api/buildings` | Contents of `data/buildings.json` |
 | GET | `/api/graph` | Contents of `data/building_graph.json` |
-| POST | `/api/ask` | Body `{"question": "..."}` → `{"answer", "place_ids", "event_ids", "route"}` (currently a stub) |
+| POST | `/api/ask` | Body `{"question": "..."}` (max 500 chars) → `{"answer", "place_ids", "event_ids", "route"}` (currently a stub) |
 
 A place entry looks like:
 
@@ -69,8 +72,10 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env        # then paste your Gemini API key
-python app.py               # http://localhost:8080
+python app.py               # http://localhost:8080 (FLASK_DEBUG=1 for debug mode)
 ```
+
+JSON data files are cached in memory, so restart the server after editing `data/`.
 
 ## Deployment
 
@@ -92,13 +97,11 @@ Because the app has a Python backend, it can no longer be hosted on GitHub Pages
   loads. `style.css` also forces `#map` to `100vh`.
 - **Large inline page.** `index.html` is ~2 MB because the campus map PNG is embedded as
   base64 and the hotspot regions are inlined in the script.
-- **Hotspot data is duplicated and rectangular.** The 98 regions are hard-coded inline
-  with only a name, and several names repeat (e.g. Fine Arts ×5, Administration ×5). They
-  are not linked to `places.json` IDs.
+- **Hotspot data is rectangular and keyed by name.** The 96 regions (59 buildings) are
+  hard-coded inline with only a name; buildings with several footprints are grouped by name
+  in the directory. They are not linked to `places.json` / `buildings.json` IDs.
 - **Placeholder data.** Leaflet bounds, the single place's coordinates, and the Gemini
   model name in `.env.example` should all be verified.
-- `static/reference_material/` is an empty, untracked folder; reference files belong in
-  `docs/reference/`.
 
 ## Next Steps
 

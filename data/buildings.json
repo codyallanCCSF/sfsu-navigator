@@ -9,31 +9,31 @@
       "floors": [
         {
           "floor": 1,
-          "floorplan": "sfsu-navigator/docs/Hensill Hall/1"
+          "floorplan": "/static/floorplans/hensill-hall/1.png"
         },
         {
           "floor": 2,
-          "floorplan": "sfsu-navigator/docs/Hensill Hall/2"
+          "floorplan": "/static/floorplans/hensill-hall/2.png"
         },
         {
           "floor": 3,
-          "floorplan": "sfsu-navigator/docs/Hensill Hall/3"
+          "floorplan": "/static/floorplans/hensill-hall/3.png"
         },
         {
           "floor": 4,
-          "floorplan": "sfsu-navigator/docs/Hensill Hall/4"
+          "floorplan": "/static/floorplans/hensill-hall/4.png"
         },
         {
           "floor": 5,
-          "floorplan": "sfsu-navigator/docs/Hensill Hall/5"
+          "floorplan": "/static/floorplans/hensill-hall/5.png"
         },
         {
           "floor": 6,
-          "floorplan": "sfsu-navigator/docs/Hensill Hall/6"
+          "floorplan": "/static/floorplans/hensill-hall/6.png"
         },
         {
           "floor": 7,
-          "floorplan": "sfsu-navigator/docs/Hensill Hall/7"
+          "floorplan": "/static/floorplans/hensill-hall/7.png"
         }
       ]
     }
