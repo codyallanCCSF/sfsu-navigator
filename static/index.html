@@ -36,6 +36,8 @@ input{border:1px solid #d4dbe2;border-radius:8px;padding:7px 9px;width:130px;out
 @media(max-width:850px){.layout{grid-template-columns:1fr}.side{position:static}.header{align-items:flex-start;flex-direction:column}}
 
 .directory{background:#fff;border-radius:12px;padding:7px;box-shadow:0 5px 20px #00000012;position:sticky;top:14px;max-height:calc(100vh - 28px);overflow:hidden}.directory-head{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}.directory-head strong{font-size:14px}.directory-head span{font-size:11px;color:#7a8490;margin-left:6px}.directory-head input{width:100%;box-sizing:border-box;border:1px solid #d9dee5;border-radius:8px;padding:6px 7px;outline:none}.building-list{overflow:auto;max-height:calc(100vh - 150px);display:flex;flex-direction:column;gap:4px}.building-item{border:0;background:#f5f7f9;text-align:left;border-radius:8px;padding:6px 8px;font-size:10px;cursor:pointer;color:#25313d}.building-item:hover{background:#e8f5ef;color:#0b7a55}.building-item.active{background:#0b7a55;color:#fff}.hotspot{z-index:1}.hotspot.selected{z-index:999}.map-wrap{touch-action:manipulation}@media(max-width:1100px){.layout{grid-template-columns:minmax(0,1fr) 150px} .directory{grid-column:auto;position:sticky;max-height:calc(100vh - 28px)}.building-list{max-height:calc(100vh - 135px);display:flex;grid-template-columns:none}}@media(max-width:850px){.layout{grid-template-columns:1fr}.map-card{grid-column:1;grid-row:1}.directory{grid-column:1;grid-row:2;position:static}.building-list{grid-template-columns:repeat(2,1fr)}}
+
+.building-details{margin-top:14px;padding-top:14px;border-top:1px solid #e5e7eb}.detail-row{margin-top:10px}.detail-label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;margin-bottom:5px}.detail-value{font-size:13px;line-height:1.45;color:#25313d}.tag-list{display:flex;flex-wrap:wrap;gap:5px}.tag{background:#eef3f7;border-radius:999px;padding:4px 7px;font-size:11px;color:#344454}.floor-select{width:100%;border:1px solid #d4dbe2;border-radius:8px;padding:7px 8px;font:inherit;font-size:12px;background:#fff}.floorplan-wrap{margin-top:10px;border:1px solid #dfe4e9;border-radius:10px;overflow:hidden;background:#f5f7f9;min-height:120px;display:flex;align-items:center;justify-content:center}.floorplan-wrap img{display:block;max-width:100%;height:auto;max-height:520px;object-fit:contain}.floorplan-placeholder{padding:18px;text-align:center;font-size:12px;color:#6b7280}.floorplan-error{padding:18px;text-align:center;font-size:12px;color:#8a3b12}.no-database{font-size:12px;color:#6b7280;margin-top:10px;padding:10px;border-radius:8px;background:#f5f7f9}@media(max-width:850px){.floorplan-wrap img{max-height:420px}}
 </style>
 </head>
 <body>
@@ -69,6 +71,7 @@ input{border:1px solid #d4dbe2;border-radius:8px;padding:7px 9px;width:130px;out
       <span class="badge">SELECTED BUILDING</span>
       <h2 id="selectedName">None selected</h2>
       <p id="selectedInfo">Turn on building selection, then click any highlighted footprint on the map.</p>
+      <div id="buildingDetails" class="building-details" hidden></div>
       <div class="stat">
         <strong id="count">98</strong>
         <span>clickable building areas detected</span>
@@ -93,6 +96,85 @@ const buildingList = document.getElementById('buildingList');
 const directorySearch = document.getElementById('directorySearch');
 const buildingCount = document.getElementById('buildingCount');
 let enabled = true;
+
+// Building database supplied for this map. Additional buildings can be added here
+// using the same structure without changing the selection logic below.
+const buildingDatabase = {
+  "hensill hall": {
+    id: "hensill-hall",
+    name: "Hensill Hall",
+    alias: ["HH", "Science Building"],
+    keywords: ["biology", "labs", "classrooms", "chemistry", "research facilities"],
+    floorcount: 7,
+    floors: [
+      {floor: 1, floorplan: "sfsu-navigator/docs/Hensill Hall/1"},
+      {floor: 2, floorplan: "sfsu-navigator/docs/Hensill Hall/2"},
+      {floor: 3, floorplan: "sfsu-navigator/docs/Hensill Hall/3"},
+      {floor: 4, floorplan: "sfsu-navigator/docs/Hensill Hall/4"},
+      {floor: 5, floorplan: "sfsu-navigator/docs/Hensill Hall/5"},
+      {floor: 6, floorplan: "sfsu-navigator/docs/Hensill Hall/6"},
+      {floor: 7, floorplan: "sfsu-navigator/docs/Hensill Hall/7"}
+    ]
+  }
+};
+const buildingDetails = document.getElementById('buildingDetails');
+
+function normalizeBuildingName(name){
+  return String(name || '').trim().toLowerCase();
+}
+
+function renderBuildingDetails(name){
+  const data = buildingDatabase[normalizeBuildingName(name)];
+  buildingDetails.hidden = false;
+  if (!data) {
+    buildingDetails.innerHTML = '<div class="no-database">No database entry is available for this building yet.</div>';
+    return;
+  }
+
+  buildingDetails.innerHTML = `
+    <div class="detail-row"><span class="detail-label">Name</span><div class="detail-value">${escapeHtml(data.name)}</div></div>
+    <div class="detail-row"><span class="detail-label">Aliases</span><div class="tag-list">${data.alias.map(a => `<span class="tag">${escapeHtml(a)}</span>`).join('')}</div></div>
+    <div class="detail-row"><span class="detail-label">Keywords</span><div class="tag-list">${data.keywords.map(k => `<span class="tag">${escapeHtml(k)}</span>`).join('')}</div></div>
+    <div class="detail-row"><label class="detail-label" for="floorSelect">Floor</label><select id="floorSelect" class="floor-select" aria-label="Select floor">${data.floors.map(f => `<option value="${f.floor}">Floor ${f.floor}</option>`).join('')}</select></div>
+    <div id="floorplanWrap" class="floorplan-wrap"><div class="floorplan-placeholder">Loading floor plan…</div></div>
+  `;
+
+  const floorSelect = document.getElementById('floorSelect');
+  floorSelect.addEventListener('change', () => renderFloorplan(data, Number(floorSelect.value)));
+  renderFloorplan(data, data.floors[0]?.floor);
+}
+
+function renderFloorplan(data, floorNumber){
+  const floor = data.floors.find(f => f.floor === floorNumber);
+  const wrap = document.getElementById('floorplanWrap');
+  if (!floor || !wrap) return;
+  wrap.innerHTML = '<div class="floorplan-placeholder">Loading floor plan…</div>';
+
+  const img = document.createElement('img');
+  img.alt = `${data.name} Floor ${floor.floor} floor plan`;
+  img.loading = 'lazy';
+  img.addEventListener('load', () => { wrap.innerHTML = ''; wrap.appendChild(img); });
+  img.addEventListener('error', () => {
+    // Some databases store an extensionless image path. Try common image extensions.
+    const candidates = [floor.floorplan + '.png', floor.floorplan + '.jpg', floor.floorplan + '.jpeg', floor.floorplan + '.webp'];
+    let attempt = 0;
+    const tryNext = () => {
+      if (attempt >= candidates.length) {
+        wrap.innerHTML = `<div class="floorplan-error">The floor is selected, but its image could not be loaded from:<br><strong>${escapeHtml(floor.floorplan)}</strong></div>`;
+        return;
+      }
+      img.src = candidates[attempt++];
+    };
+    img.addEventListener('error', tryNext, {once:true});
+    tryNext();
+  }, {once:true});
+  img.src = floor.floorplan;
+}
+
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
 
 // Give every mapped region its own selectable button. Smaller regions are inserted first,
 // so a small building remains reachable even when it sits inside a larger region.
@@ -158,6 +240,7 @@ function selectBuilding(i, fromMap=false) {
   if (listItem) { listItem.classList.add('active'); if (!fromMap) listItem.scrollIntoView({block:'nearest'}); }
   selectedName.textContent = item.r.name;
   selectedInfo.textContent = 'Selected building area. The green outline marks the exact selectable footprint used by this map.';
+  renderBuildingDetails(item.r.name);
   if (!fromMap) item.el.scrollIntoView({block:'center',inline:'center'});
 }
 
@@ -192,6 +275,8 @@ clearBtn.addEventListener('click', () => {
   document.querySelectorAll('.hotspot').forEach(x => x.classList.remove('dim'));
   selectedName.textContent = 'None selected';
   selectedInfo.textContent = 'Click any building footprint or choose one from the Building Directory.';
+  buildingDetails.hidden = true;
+  buildingDetails.innerHTML = '';
   renderDirectory();
 });
 
