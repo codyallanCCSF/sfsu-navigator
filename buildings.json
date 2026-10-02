@@ -1,0 +1,10 @@
+[
+  {"name": "J. Paul Leonard Library", "keywords": ["library", "study space", "books", "quiet study"], "notes": "VERIFY: add printing, group study rooms, hours."},
+  {"name": "Hensill Hall", "keywords": ["biology", "labs", "classrooms", "chemistry", "research facilities"], "notes": "Seven floors. Floor plans available in this app."},
+  {"name": "Thornton Hall", "keywords": [], "notes": "VERIFY: what is here?"},
+  {"name": "Mashouf Wellness Center", "keywords": ["gym", "fitness", "recreation", "wellness"], "notes": "VERIFY: hours and student access."},
+  {"name": "Gator Health Center", "keywords": ["health", "clinic", "student health"], "notes": "VERIFY: services and hours."},
+  {"name": "Student Services", "keywords": ["student services"], "notes": "VERIFY: which offices (ID card, advising, financial aid)."},
+  {"name": "Administration", "keywords": ["administration", "offices"], "notes": "VERIFY: which offices."},
+  {"name": "Creative Arts", "keywords": ["arts", "classrooms"], "notes": "VERIFY."}
+]
